@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Blank Page</title>
+
+    <!-- Inter 400 from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg: #212121;
+        --outline: #777777;
+        --text: #ffffff;
+
+        --left-pad: 30px;
+        --logo-size: 128px;
+        --gap: 18px;
+        --right-pad: 30px;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+          sans-serif;
+        font-weight: 400;
+      }
+
+      /* Logo stays vertically centered */
+      .logo {
+        position: fixed;
+        left: var(--left-pad);
+        top: 50%;
+        transform: translateY(-50%);
+        width: var(--logo-size);
+        height: var(--logo-size);
+        object-fit: contain;
+        border: 2px solid var(--outline);
+        border-radius: 50%;
+        box-sizing: border-box;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+
+      /* Text + under-image block stays directly to the right of the logo */
+      #textBlock {
+        position: fixed;
+        left: calc(var(--left-pad) + var(--logo-size) + var(--gap));
+        top: 0;
+        margin-top: 300px;
+
+        max-width: calc(
+          100vw - (var(--left-pad) + var(--logo-size) + var(--gap) + var(--right-pad))
+        );
+      }
+
+      #typeTarget {
+        color: var(--text);
+        font-size: 40px;
+        line-height: 1.15;
+
+        margin: 0;
+        margin-left: 14px;
+
+        min-height: 1em;
+
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+
+      @keyframes fadeInQuick {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      /* Start hidden, then animate in (no instant pop) */
+      .under-image {
+        /* keep margin: 0 for the image */
+        margin: 0;
+
+        width: 400px;
+        height: auto;
+        max-width: 100%;
+
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      .under-image.show {
+        visibility: visible;
+        animation: fadeInQuick 260ms ease-out forwards;
+      }
+    </style>
+  </head>
+
+  <body>
+    <img
+      class="logo"
+      src="https://cdn-icons-png.flaticon.com/512/11865/11865338.png"
+      alt="Logo"
+    />
+
+    <div id="textBlock">
+      <p id="typeTarget"></p>
+      <img
+        id="underImage"
+        class="under-image"
+        src="https://iili.io/fwU6TVR.png"
+        alt=""
+      />
+    </div>
+
+    <script>
+      const target = document.getElementById("typeTarget");
+      const underImage = document.getElementById("underImage");
+
+      // websitenameplaceholder.com?text=...
+      const params = new URLSearchParams(window.location.search);
+      const fullText = params.get("text") ?? "";
+
+      const msPerChar = 25; // typing speed
+      let i = 0;
+
+      function revealUnderImage() {
+        // trigger the fade-in animation
+        requestAnimationFrame(() => underImage.classList.add("show"));
+      }
+
+      function typeNext() {
+        target.textContent = fullText.slice(0, i);
+        i += 1;
+
+        if (i <= fullText.length) {
+          setTimeout(typeNext, msPerChar);
+        } else {
+          revealUnderImage();
+        }
+      }
+
+      target.textContent = "";
+      if (fullText.length > 0) {
+        typeNext();
+      } else {
+        revealUnderImage();
+      }
+    </script>
+  </body>
+</html>

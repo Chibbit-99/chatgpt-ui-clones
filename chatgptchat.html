@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Composer Replica</title>
+
+    <!-- Inter 400 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --page-bg: #212121;
+        --composer-bg: #303030;
+        --composer-border: rgba(255, 255, 255, 0.08);
+        --text: #f2f2f2;
+        --muted: rgba(242, 242, 242, 0.55);
+
+        --btn-hover: rgba(255, 255, 255, 0.08);
+        --btn-active: rgba(255, 255, 255, 0.12);
+        --focus: rgba(255, 255, 255, 0.18);
+
+        /* scaling */
+        --ui-scale: 1;               /* set by JS */
+        --side-gap: 12px;            /* “almost touches screen edges” */
+        --base-width: 920;           /* used by JS */
+
+        --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      }
+
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+
+      body {
+        margin: 0;
+        background: var(--page-bg);
+        color: var(--text);
+        font-family: "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+        font-weight: 400;
+      }
+
+      /* Center vertically + horizontally */
+      .stage {
+        min-height: 100%;
+        display: grid;
+        place-items: center;
+        padding: var(--side-gap);
+      }
+
+      .composer {
+        /* Nearly full-width */
+        width: calc(100vw - (var(--side-gap) * 2));
+
+        background: var(--composer-bg);
+        border: 1px solid var(--composer-border);
+        border-radius: calc(28px * var(--ui-scale));
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .composer-grid {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: calc(10px * var(--ui-scale));
+        align-items: center;
+
+        padding: calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale));
+      }
+
+      .leading,
+      .trailing {
+        display: flex;
+        align-items: center;
+        gap: calc(8px * var(--ui-scale));
+      }
+
+      .icon-btn {
+        width: calc(36px * var(--ui-scale));
+        height: calc(36px * var(--ui-scale));
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: var(--text);
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        transition: background 120ms ease, transform 120ms ease;
+      }
+      .icon-btn:hover { background: var(--btn-hover); }
+      .icon-btn:active { background: var(--btn-active); transform: translateY(0.5px); }
+      .icon-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+      .input-shell {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
+        border-radius: calc(18px * var(--ui-scale));
+      }
+
+      textarea {
+        width: 100%;
+        border: 0;
+        outline: none;
+        resize: none;
+        background: transparent;
+        color: var(--text);
+
+        font-family: inherit;
+        font-weight: 400;
+        font-size: calc(16px * var(--ui-scale));
+        line-height: calc(20px * var(--ui-scale));
+
+        height: calc(20px * var(--ui-scale));
+        min-height: calc(20px * var(--ui-scale));
+        max-height: calc(120px * var(--ui-scale));
+
+        padding: 0;
+        margin: 0;
+        overflow: auto;
+
+        caret-color: #f2f2f2;
+      }
+      textarea::placeholder { color: var(--muted); }
+
+      .circle-btn {
+        width: calc(36px * var(--ui-scale));
+        height: calc(36px * var(--ui-scale));
+        border-radius: 999px;
+        border: 0;
+        cursor: pointer;
+        background: #ffffff;
+        color: #111;
+        display: grid;
+        place-items: center;
+        transition: opacity 120ms ease, transform 120ms ease;
+      }
+      .circle-btn:hover { opacity: 0.85; }
+      .circle-btn:active { transform: translateY(0.5px); }
+      .circle-btn:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.25); outline-offset: 3px; }
+
+      .icon {
+        width: calc(20px * var(--ui-scale));
+        height: calc(20px * var(--ui-scale));
+        display: block;
+      }
+
+      /* Dictate SVG a bit bigger than others */
+      .dictate-btn .icon {
+        width: calc(22px * var(--ui-scale));
+        height: calc(22px * var(--ui-scale));
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="stage">
+      <div class="composer" role="group" aria-label="Message composer">
+        <div class="composer-grid">
+          <div class="leading">
+            <button class="icon-btn" type="button" aria-label="Add files and more">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M11 5a1 1 0 0 1 2 0v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5z"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <div class="primary">
+            <div class="input-shell">
+              <textarea id="prompt" placeholder="Ask anything" rows="1" aria-label="Message"></textarea>
+            </div>
+          </div>
+
+          <div class="trailing">
+            <button class="icon-btn dictate-btn" type="button" aria-label="Dictate">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a1 1 0 1 1 2 0 7 7 0 0 1-6 6.93V20h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-2.07A7 7 0 0 1 5 11a1 1 0 1 1 2 0 5 5 0 0 0 10 0z"
+                />
+              </svg>
+            </button>
+
+            <button class="circle-btn" type="button" aria-label="Start voice mode">
+              <svg
+                viewBox="0 0 26 26"
+                width="26"
+                height="26"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <!-- 1st: short -->
+                <rect x="6.1"  y="11" width="2.2" height="4" rx="1.1" fill="currentColor"/>
+
+                <!-- 2nd: tallest -->
+                <rect x="10.1" y="7"  width="2.2" height="12" rx="1.1" fill="currentColor"/>
+
+                <!-- 3rd: medium -->
+                <rect x="14.1" y="9"  width="2.2" height="8" rx="1.1" fill="currentColor"/>
+
+                <!-- 4th: short -->
+                <rect x="18.1" y="11" width="2.2" height="4" rx="1.1" fill="currentColor"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const ta = document.getElementById("prompt");
+
+      // ===== UI scaling (bigger + keep aspect ratio) =====
+      function clamp(n, min, max) {
+        return Math.max(min, Math.min(max, n));
+      }
+
+      function setUIScale() {
+        const baseWidth = Number(getComputedStyle(document.documentElement).getPropertyValue("--base-width")) || 920;
+        const sideGap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--side-gap")) || 12;
+        const targetWidth = window.innerWidth - sideGap * 2;
+
+        // Scale up to fill width; don't shrink below 1; cap to avoid huge on ultrawide monitors
+        const scale = clamp(targetWidth / baseWidth, 1, 1.9);
+        document.documentElement.style.setProperty("--ui-scale", String(scale));
+      }
+
+      // ===== Textarea autoresize =====
+      function getTextareaMaxPx() {
+        // keep this aligned with CSS max-height (120px * --ui-scale)
+        const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--ui-scale")) || 1;
+        return 120 * scale;
+      }
+
+      function autoresize() {
+        ta.style.height = "0px";
+        const max = getTextareaMaxPx();
+        ta.style.height = Math.min(ta.scrollHeight, max) + "px";
+      }
+
+      function setCaretToEndAndFocus() {
+        ta.focus({ preventScroll: true });
+        const end = ta.value.length;
+        try { ta.setSelectionRange(end, end); } catch {}
+      }
+
+      function randInt(min, max) {
+        return Math.floor(min + Math.random() * (max - min + 1));
+      }
+
+      // Less randomness + 1.5x faster
+      const SPEED = 1.5;
+
+      function delayForChar(ch) {
+        let d = randInt(26, 52);
+        if (ch === "\n") d += randInt(70, 130);
+        else if (/[,.!?;:]/.test(ch)) d += randInt(45, 110);
+        else if (ch === " ") d += randInt(0, 18);
+        if (Math.random() < 0.02) d += randInt(100, 240);
+        return Math.max(8, Math.round(d / SPEED));
+      }
+
+      function typeLikeHuman(text) {
+        ta.value = "";
+        autoresize();
+
+        let i = 0;
+        const step = () => {
+          if (i >= text.length) {
+            setCaretToEndAndFocus();
+            return;
+          }
+
+          ta.value += text[i];
+          i += 1;
+
+          autoresize();
+          setCaretToEndAndFocus();
+
+          setTimeout(step, delayForChar(text[i - 1]));
+        };
+
+        setCaretToEndAndFocus();
+        setTimeout(step, randInt(80, 140));
+      }
+
+      // Init
+      window.addEventListener("load", () => {
+        setUIScale();
+        autoresize();
+
+        const params = new URLSearchParams(window.location.search);
+        const text = params.get("text");
+
+        if (text && text.length) typeLikeHuman(text);
+        else setCaretToEndAndFocus();
+      });
+
+      window.addEventListener("resize", () => {
+        setUIScale();
+        autoresize();
+      });
+
+      ta.addEventListener("input", autoresize);
+    </script>
+  </body>
+</html>
